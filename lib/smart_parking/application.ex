@@ -8,16 +8,13 @@ defmodule SmartParking.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the Ecto repository
+      # disabed currently as we are not using database.
       # SmartParking.Repo,
-      # Start the Telemetry supervisor
       SmartParkingWeb.Telemetry,
-      # Start the PubSub system
       {Phoenix.PubSub, name: SmartParking.PubSub},
-      # Start the Endpoint (http/https)
-      SmartParkingWeb.Endpoint
-      # Start a worker by calling: SmartParking.Worker.start_link(arg)
-      # {SmartParking.Worker, arg}
+      SmartParkingWeb.Endpoint,
+      {SmartParking.Fence.TicketManager, []},
+      {SmartParking.Fence.ParkingManager, 10}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
