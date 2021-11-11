@@ -13,7 +13,6 @@ defmodule SmartParkingWeb.PageLive do
   end
 
   @impl true
-  @spec handle_event(<<_::32, _::_*8>>, any, any) :: {:noreply, any}
   def handle_event("status", _data, socket) do
     {:noreply, socket}
   end
@@ -29,6 +28,18 @@ defmodule SmartParkingWeb.PageLive do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("extend", %{"extend" => number}, socket) do
+    number
+    |> String.to_integer()
+    |> ParkingManager.extend_slots()
+
+    socket = fetch_assigns(socket)
+    SmartParkingWeb.Endpoint.broadcast_from(self(), @topic, "extend", socket.assigns)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("park", %{"reg_no" => reg_no, "vehicle_color" => color}, socket) do
     case ParkingManager.park(reg_no, color) do
       {:ok, _data} ->
@@ -41,6 +52,7 @@ defmodule SmartParkingWeb.PageLive do
     end
   end
 
+  @impl true
   def handle_event("leave", %{"id" => id, "value" => _}, socket) do
     id
     |> String.to_integer()
@@ -57,12 +69,17 @@ defmodule SmartParkingWeb.PageLive do
     end
   end
 
+  @impl true
+  def handle_info(_data, socket) do
+    {:noreply, fetch_assigns(socket)}
+  end
+
   defp fetch_assigns(socket) do
     assign(
-       socket,
-       status: ParkingManager.state(),
-       tickets: TicketManager.get_all_tickets()
-     )
+      socket,
+      status: ParkingManager.state(),
+      tickets: TicketManager.get_all_tickets()
+    )
   end
 
   def get_datetime(time) do

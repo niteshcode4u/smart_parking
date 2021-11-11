@@ -17,6 +17,10 @@ defmodule SmartParking.Utils.ParkingLot do
     |> add_slots(slot_count)
   end
 
+  def extend(state, slot_count) do
+    add_slots_to_existing(state, slot_count)
+  end
+
   def park(parking_lot, registration_no, color) do
     with {:ok, slot} <- get_slot(parking_lot),
          %Vehicle{} = vehicle <- get_vehicle(registration_no, color),
@@ -59,6 +63,20 @@ defmodule SmartParking.Utils.ParkingLot do
       |> Enum.to_list()
 
     %{parking_lot | slots: slots}
+  end
+
+  defp add_slots_to_existing(state, slot_count) do
+    last_id_of_existing = Enum.max_by(state.slots, & &1.id).id
+    start_with_id = last_id_of_existing + 1
+    last_id = last_id_of_existing + slot_count
+
+    slots =
+      start_with_id..last_id
+      |> Stream.map(&Slot.new(id: &1))
+      |> Enum.to_list()
+
+    new_slots = state.slots ++ slots
+    %{state | slots: new_slots}
   end
 
   defp get_slot(%__MODULE__{slots: [slot | _remaining_slots]}), do: {:ok, slot}

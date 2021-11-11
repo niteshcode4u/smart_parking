@@ -1,5 +1,20 @@
 # SmartParking
 
+SmartParking is a parking management system which is non-persistent and managing 
+the state inside the GenServer. 
+
+SmartParking application provide functionality to
+
+  * Create parking lots
+  * Extend existing parking lots
+  * Parking slots inside the parking lot
+
+Once parking slots are crated inside the parking lot we can start parking vehicles.
+
+
+
+
+# Basic installation and set up (Need to write properly)
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`

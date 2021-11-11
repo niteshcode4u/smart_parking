@@ -33,6 +33,10 @@ defmodule SmartParking.Fence.ParkingManager do
     GenServer.call(manager, {:create, slot_count})
   end
 
+  def extend_slots(manager \\ __MODULE__, slot_count) do
+    GenServer.call(manager, {:extend, slot_count})
+  end
+
   def park(manager \\ __MODULE__, registration_no, color) do
     GenServer.call(manager, {:park, registration_no, color})
   end
@@ -53,6 +57,12 @@ defmodule SmartParking.Fence.ParkingManager do
   def handle_call({:create, slot_count}, _from, _state) do
     state = ParkingLot.new(slot_count)
     {:reply, state, state}
+  end
+
+  @impl true
+  def handle_call({:extend, slot_count}, _from, state) do
+    state_new = ParkingLot.extend(state, slot_count)
+    {:reply, state_new, state_new}
   end
 
   @impl true
