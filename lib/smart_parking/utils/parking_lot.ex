@@ -49,6 +49,12 @@ defmodule SmartParking.Utils.ParkingLot do
     end
   end
 
+  def delete_slot(state, slot_id) do
+    new_slots = Enum.drop_while(state.slots, &(&1).id == slot_id)
+
+    %{state | slots: new_slots}
+  end
+
   #######################     Private functions      #####################
 
   defp add_id(%__MODULE__{} = parking_lot),

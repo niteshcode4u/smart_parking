@@ -37,6 +37,10 @@ defmodule SmartParking.Fence.ParkingManager do
     GenServer.call(manager, {:extend, slot_count})
   end
 
+  def delete_slot(manager \\ __MODULE__, slot_id) do
+    GenServer.call(manager, {:delete, slot_id})
+  end
+
   def park(manager \\ __MODULE__, registration_no, color) do
     GenServer.call(manager, {:park, registration_no, color})
   end
@@ -75,5 +79,11 @@ defmodule SmartParking.Fence.ParkingManager do
   def handle_call({:leave, slot_id}, _from, state) do
     {_status, msg, state} = ParkingLot.leave(state, slot_id)
     {:reply, msg, state}
+  end
+
+  @impl true
+  def handle_call({:delete, slot_id}, _from, state) do
+    new_state = ParkingLot.delete_slot(state, slot_id)
+    {:reply, new_state, new_state}
   end
 end

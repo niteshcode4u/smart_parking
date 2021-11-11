@@ -40,6 +40,18 @@ defmodule SmartParkingWeb.PageLive do
   end
 
   @impl true
+  def handle_event("delete_slot", %{"slot_id" => slot_id}, socket) do
+    slot_id
+    |> String.to_integer()
+    |> ParkingManager.delete_slot()
+
+
+    socket = fetch_assigns(socket)
+    SmartParkingWeb.Endpoint.broadcast_from(self(), @topic, "extend", socket.assigns)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("park", %{"reg_no" => reg_no, "vehicle_color" => color}, socket) do
     case ParkingManager.park(reg_no, color) do
       {:ok, _data} ->
