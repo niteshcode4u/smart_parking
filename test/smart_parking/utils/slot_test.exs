@@ -1,4 +1,4 @@
-defmodule ParkingLot.Core.SlotTest do
+defmodule ParkingLot.Utils.SlotTest do
   @moduledoc """
   Test cases for parking slot
   """
@@ -6,8 +6,8 @@ defmodule ParkingLot.Core.SlotTest do
 
   test "struct valid?" do
     fields = [id: 1]
-    slot_struct = %ParkingLot.Core.Slot{id: 1, ticket_id: nil, type: nil}
+    slot_struct = %ParkingLot.Utils.Slot{id: 1, ticket_id: nil, type: nil}
 
-    assert ParkingLot.Core.Slot.new(fields) == slot_struct
+    assert ParkingLot.Utils.Slot.new(fields) == slot_struct
   end
 end

@@ -41,94 +41,48 @@
     <header>
         <table>
             <tr>
-                <img src={Routes.static_path(@socket, "/images/phoenix.png")} alt="Phoenix Framework Logo"/>
+                <td><img src={Routes.static_path(@socket, "/images/phoenix.png")} alt="Phoenix Framework Logo"/></td>
+                <td>
+                    <form phx-submit="extend">
+                        <input type="number" min="1" max="100" value="10" name= "extend" />
+                        <button>Extend slots</button>
+                    </form>
+                </td>
             </tr>
         </table>
     </header>
     <body>
-        <table>
-            <thead>
-                <tr>
-                    <th></th><th></th><th></th><th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Available slots: <%= length(@status.slots) %></strong></td><td></td><td></td>
-                    <td><strong>Used slots: <%= length(@status.used_slots) %></strong></td>
-                </tr>
-                <tr>
-                    <td>
-                        <form phx-submit="create">
-                            <input type="number" min="1" max="100" value="10" name= "create" />
-                            <button>Create slots</button>
-                        </form>
-                    </td>
-                    <td></td><td></td>
-                    <td>
-                        <form phx-submit="extend">
-                            <input type="number" min="1" max="100" value="10" name= "extend" />
-                            <button>Extend slots</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
         <table id="customers">
             <thead>
                 <tr>
+                    <th>Slot no</th>
                     <th>Registration number</th>
                     <th>Vehicle color</th>
-                    <th>Operation</th>
-                    <th></th>
+                    <th>Operations</th>
+                    <th style="width:5px" >Ops</th>
                 </tr>
             </thead>
             <tbody>
-                <%= for slot <- @status.slots do %>
+                <%= for slot <- @status do %>
                     <tr>
                         <form phx-submit="park">
-                            <td><input type="text" name="reg_no" placeholder="Enter vehicle registration number" required></td>
-                            <td><input type="text" name="vehicle_color" placeholder="Enter vehicle color" required></td>
-                            <td><button>Park your vehicle</button></td>
-                            <td>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" name ="delete" phx-value-slot_id={slot.id} phx-click="delete_slot">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </td>
+                            <td><p><%= slot.id %></p></td>
+                            <%= if Map.has_key?(slot, :registration_no) do %>
+                                <td><p><%= slot.registration_no %></p></td>
+                                <td><p><%= slot.color %></p></td>
+                                <td><input type="button" value="Leave Now" phx-value-id={slot.id} phx-click="leave" /></td>
+                                <td><p><%= get_datetime(slot.entry_time) %></p></td>
+                            <%= else %>
+                                <td><input type="text" name="reg_no" placeholder="Enter vehicle registration number" required></td>
+                                <td><input type="text" name="vehicle_color" placeholder="Enter vehicle color" required></td>
+                                <td><button>Park your vehicle</button></td>
+                                <td>
+                                    <svg  xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" name ="delete" phx-click="delete_slot"  phx-value-slot_id={slot.id}>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </td>
+                            <%= end %>
                         </form>
-                    </tr>
-                <% end %>
-            </tbody>
-        </table>
-
-        <br>
-        <table id="customers">
-            <thead>
-                <tr>
-                    <th>Slot id</th>
-                    <th>Ticket id</th>
-                    <th>Vehicle registration no</th>
-                    <th>Vehicle color</th>
-                    <th>Entry time</th>
-                    <th>Exit time</th>
-                </tr>
-            </thead>
-            <tbody>
-                <%= for ticket <- @tickets do %>
-                    <tr>
-                        <td> <%= ticket.slot_id %> </td>
-                        <td> <%= ticket.id %> </td>
-                        <td> <%= ticket.vehicle.registration_no %> </td>
-                        <td> <%= ticket.vehicle.color %> </td>
-                        <td> <%= get_datetime(ticket.entry_time) %> </td>
-                        <td>
-                            <%= if is_nil(ticket.exit_time) do %>
-                                <input type="button" value="Leave Now" phx-value-id={ticket.slot_id} phx-click="leave" />
-                            <% else %>
-                                <%= get_datetime(ticket.exit_time) %>
-                            <% end %>
-                        </td>
                     </tr>
                 <% end %>
             </tbody>

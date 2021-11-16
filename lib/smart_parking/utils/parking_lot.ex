@@ -24,6 +24,7 @@ defmodule SmartParking.Utils.ParkingLot do
   def park(parking_lot, registration_no, color) do
     with {:ok, slot} <- get_slot(parking_lot),
          %Vehicle{} = vehicle <- get_vehicle(registration_no, color),
+         :ok <- validate_vehicle(registration_no),
          ticket <- create_ticket(slot, vehicle),
          new_slot <- add_ticket_to_slot(slot, ticket),
          parking_lot <- update_used_slot(new_slot, parking_lot, :insert),
@@ -50,9 +51,13 @@ defmodule SmartParking.Utils.ParkingLot do
   end
 
   def delete_slot(state, slot_id) do
-    new_slots = Enum.drop_while(state.slots, &(&1).id == slot_id)
-
-    %{state | slots: new_slots}
+    with new_slots <- Enum.filter(state.slots, &(&1.id != slot_id)),
+         true <- length(new_slots) < length(state.slots) do
+      {:ok, :success, %{state | slots: new_slots}}
+    else
+      _ ->
+        {:error, "Invalid slot number", state}
+    end
   end
 
   #######################     Private functions      #####################
@@ -90,6 +95,19 @@ defmodule SmartParking.Utils.ParkingLot do
 
   defp get_vehicle(registration_no, color),
     do: Vehicle.new(%{color: color, registration_no: registration_no})
+
+  def validate_vehicle(registration_no) do
+    tickets = SmartParking.Fence.TicketManager.get_all_tickets()
+
+    Enum.find(tickets, fn ticket ->
+      ticket.vehicle.registration_no == registration_no and ticket.exit_time == nil
+    end)
+    |> is_nil()
+    |> case do
+      true -> :ok
+      false -> {:error, "Same car already parked"}
+    end
+  end
 
   defp create_ticket(%Slot{id: id}, %Vehicle{} = vehicle) do
     %{slot_id: id, vehicle: vehicle}

@@ -83,7 +83,7 @@ defmodule SmartParking.Fence.ParkingManager do
 
   @impl true
   def handle_call({:delete, slot_id}, _from, state) do
-    new_state = ParkingLot.delete_slot(state, slot_id)
-    {:reply, new_state, new_state}
+    {_status, msg, new_state} = ParkingLot.delete_slot(state, slot_id)
+    {:reply, msg, new_state}
   end
 end

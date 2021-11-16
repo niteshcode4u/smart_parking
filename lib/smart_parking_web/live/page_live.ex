@@ -1,98 +1,78 @@
 defmodule SmartParkingWeb.PageLive do
   use SmartParkingWeb, :live_view
-  alias SmartParking.Fence.ParkingManager
-  alias SmartParking.Fence.TicketManager
 
-  @topic "live"
-
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    if connected?(socket), do: SmartParkingWeb.Endpoint.subscribe(@topic)
+    if connected?(socket), do: SmartParkingWeb.Endpoint.subscribe("live")
 
-    {:ok, fetch_assigns(socket)}
+    {:ok, update_assigns(socket)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("status", _data, socket) do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("create", %{"create" => number}, socket) do
     number
     |> String.to_integer()
-    |> ParkingManager.create_slots()
+    |> SmartParking.create_parking_lot()
 
-    socket = fetch_assigns(socket)
-    SmartParkingWeb.Endpoint.broadcast_from(self(), @topic, "create", socket.assigns)
+    socket = update_assigns(socket)
+    SmartParking.broadcast_status(self(), "create", socket.assigns)
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("extend", %{"extend" => number}, socket) do
     number
     |> String.to_integer()
-    |> ParkingManager.extend_slots()
+    |> SmartParking.extend_slots()
 
-    socket = fetch_assigns(socket)
-    SmartParkingWeb.Endpoint.broadcast_from(self(), @topic, "extend", socket.assigns)
+    socket = update_assigns(socket)
+    SmartParking.broadcast_status(self(), "extend", socket.assigns)
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("delete_slot", %{"slot_id" => slot_id}, socket) do
     slot_id
     |> String.to_integer()
-    |> ParkingManager.delete_slot()
+    |> SmartParking.delete_slot()
 
-
-    socket = fetch_assigns(socket)
-    SmartParkingWeb.Endpoint.broadcast_from(self(), @topic, "extend", socket.assigns)
+    socket = update_assigns(socket)
+    SmartParking.broadcast_status(self(), "delete", socket.assigns)
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("park", %{"reg_no" => reg_no, "vehicle_color" => color}, socket) do
-    case ParkingManager.park(reg_no, color) do
-      {:ok, _data} ->
-        socket = fetch_assigns(socket)
-        SmartParkingWeb.Endpoint.broadcast_from(self(), @topic, "park", socket.assigns)
-        {:noreply, socket}
+    SmartParking.park(reg_no, color)
+    socket = update_assigns(socket)
+    SmartParking.broadcast_status(self(), "park", socket.assigns)
 
-      _ ->
-        {:noreply, socket}
-    end
+    {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("leave", %{"id" => id, "value" => _}, socket) do
     id
     |> String.to_integer()
-    |> ParkingManager.leave()
-    |> case do
-      :success ->
-        socket = fetch_assigns(socket)
-        SmartParkingWeb.Endpoint.broadcast_from(self(), @topic, "leave", socket.assigns)
-        {:noreply, socket}
+    |> SmartParking.leave()
 
-      _ ->
-        # TODO: Needs to handle error case properly
-        {:noreply, socket}
-    end
+    socket = update_assigns(socket)
+    SmartParking.broadcast_status(self(), "leave", socket.assigns)
+    {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(_data, socket) do
-    {:noreply, fetch_assigns(socket)}
+    {:noreply, update_assigns(socket)}
   end
 
-  defp fetch_assigns(socket) do
-    assign(
-      socket,
-      status: ParkingManager.state(),
-      tickets: TicketManager.get_all_tickets()
-    )
-  end
+  defp update_assigns(socket),
+    do: assign(socket, status: SmartParking.status())
 
   def get_datetime(time) do
     time

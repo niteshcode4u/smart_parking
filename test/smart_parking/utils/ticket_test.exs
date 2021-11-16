@@ -1,21 +1,20 @@
-defmodule ParkingLot.Core.TicketTest do
+defmodule ParkingLot.Utils.TicketTest do
   @moduledoc """
   Test cases for parking ticket
   """
 
   use ExUnit.Case
-  alias ParkingLot.Core.{Vehicle, Ticket}
+  alias ParkingLot.Utils.{Vehicle, Ticket}
 
-  @tag :wip
   test "validate ticket struct" do
     # setup
-    ticket = %ParkingLot.Core.Ticket{
+    ticket = %ParkingLot.Utils.Ticket{
       id: 8,
       price: nil,
       slot_id: 1,
-      timestamp_entry: ~U[2020-06-01 03:24:09.312430Z],
-      timestamp_exit: nil,
-      vehicle: %ParkingLot.Core.Vehicle{color: "red", registration_no: "abc"}
+      entry_time: ~U[2020-06-01 03:24:09.312430Z],
+      exit_time: nil,
+      vehicle: %ParkingLot.Utils.Vehicle{color: "red", registration_no: "abc"}
     }
 
     vehicle = Vehicle.new(registration_no: "abc", color: "red")
