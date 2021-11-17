@@ -48,8 +48,15 @@ defmodule SmartParkingWeb.PageLive do
 
   @impl Phoenix.LiveView
   def handle_event("park", %{"reg_no" => reg_no, "vehicle_color" => color}, socket) do
-    SmartParking.park(reg_no, color)
-    socket = update_assigns(socket)
+    socket = clear_flash(socket)
+
+    socket =
+      case SmartParking.park(reg_no, color) do
+        :success -> put_flash(socket, :info, "Successfully parked!")
+        message -> put_flash(socket, :error, message)
+      end
+      |> update_assigns()
+
     SmartParking.broadcast_status(self(), "park", socket.assigns)
 
     {:noreply, socket}

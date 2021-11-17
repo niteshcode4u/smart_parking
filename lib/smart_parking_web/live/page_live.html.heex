@@ -36,7 +36,7 @@
                                 <td><p><%= slot.color %></p></td>
                                 <td><input type="button" value="Leave Now" phx-value-id={slot.id} phx-click="leave" /></td>
                                 <td><p><%= get_datetime(slot.entry_time) %></p></td>
-                            <%= else %>
+                            <% else %>
                                 <td><input type="text" name="reg_no" placeholder="Enter vehicle registration number" required></td>
                                 <td><input type="text" name="vehicle_color" placeholder="Enter vehicle color" required></td>
                                 <td><button>Park your vehicle</button></td>
@@ -45,7 +45,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </td>
-                            <%= end %>
+                            <% end %>
                         </form>
                     </tr>
                 <% end %>
